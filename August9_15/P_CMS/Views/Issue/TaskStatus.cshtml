@@ -1,0 +1,333 @@
+﻿@model P_CMS.Models.ChangeStatusModel
+@{
+    var uploadedFiles = ViewData["UploadedFiles"] == null ? null : (List<P_CMS.Models.FilesUploaded>)ViewData["UploadedFiles"];
+    string hide = uploadedFiles == null ? "hidden" : "";
+    ViewBag.Title = "Change Status";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string desc = Model == null ? "" : Model.PrevDescription;
+}
+<style>
+    .reassignedText {
+        color: green !important;
+    }
+
+        .reassignedText > hr {
+            border-color: green !important;
+        }
+
+    .closedText > hr {
+        border-color: red !important;
+    }
+
+    .closedText {
+        color: red !important;
+    }
+
+    hr {
+        margin-top: 0px;
+    }
+
+    .newLine {
+        border-color: #b7b7b7;
+        margin-bottom: 5px;
+        margin-top: 0px;
+    }
+
+    .BoldText {
+        font-size: 15px;
+    }
+
+        .BoldText > div {
+            background-color: yellow;
+        }
+
+    .txtDescription {
+        background-color: #fff;
+        border-style: ridge;
+        font-size: 13px;
+        font-weight: normal;
+        height: 280px;
+        overflow-x: hidden;
+        overflow-y: scroll;
+        padding: 3px;
+        resize: none;
+        border: 1px solid #b6b6b6;
+        border-radius: 4px;
+        box-shadow: 0 0 3px rgba(0, 0, 0, 0.15);
+        display: block;
+    }
+
+    .errorMsg {
+        color: #b94a48;
+        margin-bottom: 10px;
+        margin-top: 0;
+        font-size: 14px;
+        list-style: none none circle;
+    }
+
+    .dvUploadedFiles {
+        border: 1px solid #cccccc;
+        border-radius: 4px;
+        box-shadow: 0 0 3px rgba(0, 0, 0, 0.15);
+        font-size: 15px;
+        margin-left: 16px;
+        width: 282px;
+        padding-top: 2px;
+    }
+</style>
+
+    <div class="row">
+        <h2 class="col-md-6">Change Status</h2>
+        <div class="col-md-6" id="defaultCountdown"></div>
+    </div>
+  
+    @using (Html.BeginForm())
+    {
+        if (Model != null)
+        {
+            @Html.AntiForgeryToken()
+            <div class="form-horizontal">
+                @Html.HiddenFor(model => model.UpdatedOn, htmlAttributes: new { @id = "ddCreatedOn" })
+                @Html.HiddenFor(model => model.UploadedFileName, htmlAttributes: new { @id = "UploadedFileName" })
+                @Html.HiddenFor(model => model.id)
+                <hr />
+                <ul class="errorMsg hidden">
+                    <li>Description required</li>
+                </ul>
+                @Html.ValidationSummary("", new { @class = "text-danger" })
+                <div id="dvIssueDetail">
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.IssueCode, "Task Code", htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.DisplayFor(model => model.IssueCode)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.Tag, "Tag", htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.DisplayFor(model => model.TaskTag)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.StatusType, "Status", htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.DisplayFor(model => model.StatusType)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.AssignedTo, "Assigned To", htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.DisplayFor(model => model.AssignedTo)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.ProductId, "Line of Business", htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.DisplayFor(model => model.ProductName)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.ProductId, "Product", htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.DisplayFor(model => model.ProductName)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-md-2"> Attach Files</label>
+                        <div class="col-md-10">
+                            <input type="file" name="FileToUpload" id="fu-my-auto-upload" class="btn active" />
+                        </div>
+                        <label class="control-label col-md-2"> </label>
+                        <div class="dvUploadedFiles  col-md-3 @hide">
+                            @if (uploadedFiles != null)
+                            {
+                                foreach (var item in uploadedFiles)
+                                {
+                                    <a href="#" target="_parent"> @item.name</a><br />
+                                }
+                            }
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.Label("Previous Comments", htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            <label class="txtDescription"> @Html.Raw(WebUtility.HtmlDecode(desc))</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.Description, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            @Html.TextAreaFor(model => model.Description, new { htmlAttributes = new { @id = "Description", @class = "form-control" } })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.isClosed, htmlAttributes: new { @class = "control-label col-md-2" })
+                        <div class="col-md-10">
+                            <input type="checkbox" name="isClosed" id="isClosed" />
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10">
+                        <input type="submit" value="Save" id="btnSave" class="btn btn-default" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel">Change Status Confirmation</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <label>This will make the current '@Model.IssueCode' task to be closed.</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Ok</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    <div>
+        @Html.ActionLink("Back", "Index")
+    </div>
+
+    @section Scripts {
+        <script src="~/Content/FileUpload/jquery-ui-1.9.2.min.js"></script>
+        <script src="~/Content/ckeditor/ckeditor.js"></script>
+        <script src="~/Content/ckeditor/adapters/jquery.js"></script>
+        <script src="~/Content/FileUpload/jquery.fileupload.js"></script>
+        <script src="~/Content/FileUpload/jquery.fileupload-ui.js"></script>
+        <script src="~/Content/FileUpload/jquery.iframe-transport.js"></script>
+<link href="~/Content/CountDown/jquery.countdown.css" rel="stylesheet" />
+<script src="~/Content/CountDown/jquery.plugin.js"></script>
+<script src="~/Content/CountDown/jquery.countdown.js"></script>
+
+        <script>
+            var uploadedFiles = [];
+            var selected_client = 0;
+            $(document).ready(function () {
+                displayTimer($('#ddCreatedOn').val());
+                initAutoFileUpload();
+                $('.txtDescription').find('.dvDescription').first().addClass('BoldText');
+                var num = 0;
+                $($(".txtDescription").find('.dvDescription').get().reverse()).each(function (i) {
+                    num++;
+                    $(this).find('hr').next().prepend(num + "- ");
+                });
+                $('#Description').ckeditor({
+
+                    htmlEncodeOutput: true,
+                    filebrowserFlashGeneralUrl: null,
+                    enterMode: CKEDITOR.ENTER_BR,
+                    shiftEnterMode: CKEDITOR.ENTER_P
+                });
+                $('#btnSave').click(function () {
+                    loadFilesUploadedArray("$");
+                });
+                $(document.body).on('change', '#isClosed', function () {
+                    if ($(this).is(":checked")) {
+                        var options = {
+                            "backdrop": "static",
+                            "show": "true"
+                        }
+                        $('#myModal').modal(options, 'toggle');
+                    }
+                });
+            });
+
+            function loadFilesUploadedArray(separator) {
+                if (uploadedFiles.length > 0) {
+                    var files = "";
+                    for (var i = 0; i < uploadedFiles.length; i++) {
+                        if (i > 0) {
+                            files = files + separator + uploadedFiles[i];
+                        } else { files = uploadedFiles[i]; }
+                    }
+                    if ($('#UploadedFileName').val().length > 0) {
+                        files = $('#UploadedFileName').val() + separator + files;
+                    }
+                    $('#UploadedFileName').val(files);
+                }
+            }
+
+            function initAutoFileUpload() {
+                'use strict';
+                var lineBreak = "";
+                $('#fu-my-auto-upload').fileupload({
+                    autoUpload: true,
+                    url: '/WebHelper/UploadFile',
+                    dataType: 'json',
+                    add: function (e, data) {
+                        var jqXHR = data.submit()
+                            .success(function (data, textStatus, jqXHR) {
+                                if (data.isUploaded) {
+                                    uploadedFiles.push(data.filepath);
+                                    var fileLink = "<a href='#' target='_parent'>" + data.file + "</a>";
+                                    $('.dvUploadedFiles').prepend(fileLink + '<br>');
+                                    $('.dvUploadedFiles').find('div:first').remove();
+                                    $('.dvUploadedFiles').removeClass('hidden').slideDown();
+                                }
+                                else {
+
+                                    alert('File not uploaded successfully');
+                                }
+                            })
+                            .error(function (data, textStatus, errorThrown) {
+                                if (typeof (data) != 'undefined' || typeof (textStatus) != 'undefined' || typeof (errorThrown) != 'undefined') {
+                                    alert(textStatus + errorThrown + data);
+                                }
+                            });
+                    },
+                    fail: function (event, data) {
+                        if (data.files[0].error) {
+                            alert(data.files[0].error);
+                        }
+                    }
+                });
+            } function initAutoFileUpload() {
+                'use strict';
+                var lineBreak = "";
+                $('#fu-my-auto-upload').fileupload({
+                    autoUpload: true,
+                    url: '/WebHelper/UploadFile',
+                    dataType: 'json',
+                    add: function (e, data) {
+                        var jqXHR = data.submit()
+                            .success(function (data, textStatus, jqXHR) {
+                                if (data.isUploaded) {
+                                    uploadedFiles.push(data.filepath);
+                                    var fileLink = "<a href='#' target='_parent'>" + data.file + "</a>";
+                                    $('.dvUploadedFiles').prepend(fileLink + '<br>');
+                                    $('.dvUploadedFiles').find('div:first').remove();
+                                    $('.dvUploadedFiles').removeClass('hidden').slideDown();
+                                }
+                                else {
+
+                                    alert('File not uploaded successfully');
+                                }
+                            })
+                            .error(function (data, textStatus, errorThrown) {
+                                if (typeof (data) != 'undefined' || typeof (textStatus) != 'undefined' || typeof (errorThrown) != 'undefined') {
+                                    alert(textStatus + errorThrown + data);
+                                }
+                            });
+                    },
+                    fail: function (event, data) {
+                        if (data.files[0].error) {
+                            alert(data.files[0].error);
+                        }
+                    }
+                });
+            }
+        </script>
+    }
+
+

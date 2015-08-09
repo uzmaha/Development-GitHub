@@ -1,0 +1,151 @@
+﻿@model P_CMS.Models.TaskModels
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .dvUploadedFiles {
+        border: 1px solid #cccccc;
+        border-radius: 4px;
+        box-shadow: 0 0 3px rgba(0, 0, 0, 0.15);
+        font-size: 15px;
+        margin-left: 16px;
+        width: 282px;
+        padding-top: 2px;
+    }
+</style>
+<h2>Create Task</h2>
+@using (Html.BeginForm("Create", "Issue", null, FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="form-horizontal">
+        <hr />
+        @Html.HiddenFor(model => model.UploadedFileName, htmlAttributes: new { @id = "UploadedFileName" })
+        @Html.ValidationSummary("", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.LabelFor(model => model.ClientId, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownListFor(model => model.ClientId, (IEnumerable<SelectListItem>)ViewBag.RoleId, "Select Client", htmlAttributes: new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.ProductId, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownListFor(model => model.ProductId, (IEnumerable<SelectListItem>)ViewBag.RoleId, "Select Product", htmlAttributes: new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.PriorityId, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownListFor(model => model.PriorityId, (IEnumerable<SelectListItem>)ViewBag.RoleId, "Select Priority", htmlAttributes: new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.TagId, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownListFor(model => model.TagId, (IEnumerable<SelectListItem>)ViewBag.RoleId, "Select Tag", htmlAttributes: new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-md-2"> Attach Files</label>
+            <div class="col-md-10">
+                <input type="file" name="FileToUpload" id="fu-my-auto-upload" class="btn active" />
+            </div><label class="control-label col-md-2"> </label><div class="dvUploadedFiles  col-md-3 hidden">
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.Description, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.TextAreaFor(model => model.Description, new { htmlAttributes = new { @id = "Description", @class = "Description form-control" } })
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" id="btnAddIssue" value="Save" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+<div>
+    @Html.ActionLink("Back", "Index")
+</div>
+@section Scripts {
+    <script src="~/Content/FileUpload/jquery-ui-1.9.2.min.js"></script>
+    <script src="~/Content/ckeditor/ckeditor.js"></script>
+    <script src="~/Content/ckeditor/adapters/jquery.js"></script>
+    <script src="~/Content/FileUpload/jquery.fileupload.js"></script>
+    <script src="~/Content/FileUpload/jquery.fileupload-ui.js"></script>
+    <script src="~/Content/FileUpload/jquery.iframe-transport.js"></script>
+    <script>
+        var uploadedFiles = [];
+        var selected_client = 0;
+        $(document).ready(function () {
+            initAutoFileUpload();
+            $('.txtDescription').find('.dvDescription').first().addClass('BoldText');
+
+            $('#Description').ckeditor({
+                htmlEncodeOutput: true,
+                filebrowserFlashGeneralUrl: null,
+                enterMode: CKEDITOR.ENTER_BR,
+                shiftEnterMode: CKEDITOR.ENTER_P,
+            });
+
+            $('#btnAddIssue').click(function () {
+                loadFilesUploadedArray("$");
+            });
+
+            $('#ClientId').change(function (e) {
+                e.preventDefault();
+                selected_client = $(this).val();
+                var clientId = JSON.stringify({ id: -1, clientId: selected_client });
+            });
+        });
+
+        function loadFilesUploadedArray(separator) {
+            if (uploadedFiles.length > 0) {
+                var files = "";
+                for (var i = 0; i < uploadedFiles.length; i++) {
+                    if (i > 0) {
+                        files = files + separator + uploadedFiles[i];
+                    } else { files = uploadedFiles[i]; }
+                }
+                $('#UploadedFileName').val(files);
+            }
+        }
+
+        function initAutoFileUpload() {
+            'use strict';
+            var lineBreak = "";
+            $('#fu-my-auto-upload').fileupload({
+                autoUpload: true,
+                url: '/WebHelper/UploadFile',
+                dataType: 'json',
+                add: function (e, data) {
+                    var jqXHR = data.submit()
+                        .success(function (data, textStatus, jqXHR) {
+                            if (data.isUploaded) {
+                                uploadedFiles.push(data.filepath);
+                                var fileLink = "<a href='#' target='_parent'>" + data.file + "</a>";
+                                $('.dvUploadedFiles').prepend(fileLink + '<br>');
+                                $('.dvUploadedFiles').find('div:first').remove();
+                                $('.dvUploadedFiles').removeClass('hidden').slideDown();
+                            }
+                            else {
+                                alert('File not uploaded successfully');
+                            }
+                        })
+                        .error(function (data, textStatus, errorThrown) {
+                            if (typeof (data) != 'undefined' || typeof (textStatus) != 'undefined' || typeof (errorThrown) != 'undefined') {
+                                alert(textStatus + errorThrown + data);
+                            }
+                        });
+                },
+                fail: function (event, data) {
+                    if (data.files[0].error) {
+                        alert(data.files[0].error);
+                    }
+                }
+            });
+        }
+    </script>
+}
+

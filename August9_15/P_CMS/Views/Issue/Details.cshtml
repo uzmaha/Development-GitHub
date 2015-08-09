@@ -1,0 +1,201 @@
+﻿@model P_CMS.Models.Issue
+@{
+    var uploadedFiles = ViewData["UploadedFiles"] == null ? null : (List<P_CMS.Models.FilesUploaded>)ViewData["UploadedFiles"];
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>    
+    .dvUploadedFiles {
+        border: 1px solid #cccccc;
+        border-radius: 4px;
+        box-shadow: 0 0 3px rgba(0, 0, 0, 0.15);
+        font-size: 15px;
+        margin-left: 16px;
+        width: 217px;
+        padding-top: 2px;
+        padding-left: 12px;
+        margin-bottom: 3px;
+    }
+
+    .reassignedText {
+        color: green !important;
+    }
+        .reassignedText > hr {
+            border-color: green !important;
+        }
+
+    .closedText > hr {
+        border-color: red !important;
+    }
+
+    .closedText {
+        color: red !important;
+    }
+
+    .BoldText {
+        font-size: 15px !important;
+    }
+
+        .BoldText > div {
+            background-color: yellow;
+        }
+
+    .txtDescription {
+        background-color: #fff;
+        border-style: ridge;
+        font-size: 13px;
+        font-weight: normal;
+        height: 280px;
+        overflow-x: hidden;
+        overflow-y: scroll;
+        resize: none;
+        /*width: 945px;*/
+        border-radius: 4px;
+        border: 1px solid #b6b6b6;
+        box-shadow: 0 0 3px rgba(0, 0, 0, 0.15);
+        display: block;
+    }
+
+    .newLine {
+        border-color: #b7b7b7;
+        margin-bottom: 5px;
+        margin-top: 0px;
+    }
+</style>
+
+<div class="row">
+    <h2 class="col-md-6"> @Model.IssueCode</h2>
+    <div class="col-md-6" id="defaultCountdown" ></div></div>
+<div>
+    <hr />
+    @Html.HiddenFor(model => model.UploadedFileName, htmlAttributes: new { @id = "UploadedFileName" })
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.IssueCode)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.IssueCode)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Tag)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Tag.TagValue)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Client.Name)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Client.Name)
+        </dd>
+        @if (Model.ApplicationUser != null)
+        {
+            <dt>
+                Assigned To
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.ApplicationUser.FullName)
+            </dd>
+        }
+        <dt>
+            @Html.DisplayNameFor(model => model.Priority)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Priority.PriorityType)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Product)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Product.ProductName)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Status)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Status.StatusType)
+        </dd>
+        @if (uploadedFiles != null)
+        {
+            <dt>Attached Files</dt>
+            <dd class="dvUploadedFiles">
+                @foreach (var item in uploadedFiles)
+                {
+                    string fileLink = item.dbFileName;
+                     <a href='#' link="@fileLink" class="aDownloadFile" target="_Parent">@item.name</a>
+                    <br />                    
+                }
+            </dd>
+        }
+        <dt>
+            @Html.DisplayNameFor(model => model.Description)
+        </dt>
+        @{string desc = Model == null ? "" : Model.Description;}
+        <dd>
+            <label class="txtDescription col-md-12"> @Html.Raw(WebUtility.HtmlDecode(desc))</label>
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.CreatedBy)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.CreatedBy)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.CreatedOn)
+        </dt>
+        <dd >
+            @Html.DisplayFor(model => model.CreatedOn)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.UpdatedBy)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.UpdatedBy)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.UpdatedOn)
+        </dt>
+        <dd id="ddCreatedOn">
+            @Html.DisplayFor(model => model.UpdatedOn)
+        </dd>
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Back", "Index", new { id = Model.IssueId, statusId = Model.Status.StatusId })
+</p>@section Scripts {
+<link href="~/Content/CountDown/jquery.countdown.css" rel="stylesheet" />
+<script src="~/Content/CountDown/jquery.plugin.js"></script>
+<script src="~/Content/CountDown/jquery.countdown.js"></script>
+    <script>
+        $(document).ready(function () {
+            displayTimer($('#ddCreatedOn').html());
+            var uploadedFiles = [];
+            var num = 0;
+            $('.txtDescription').find('.dvDescription').first().addClass('BoldText');
+            $($(".txtDescription").find('.dvDescription').get().reverse()).each(function (i) {
+                num++;
+                $(this).find('hr').next().prepend(num + "- ");
+            });
+            $(document.body).on('click', '.aDownloadFile', function (e) {
+                e.preventDefault();
+                var linkParam = $(this).attr('link');
+                var fileName = $(this).html();
+                var fileParams = JSON.stringify({ fileName: fileName, fileDBName: linkParam });
+
+                if (fileName != "") {
+                    $.ajax({
+                        url: '/WebHelper/Download',
+                        type: 'GET',
+                        data: fileParams,
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            // window.open(data.fileUrl);
+                            // response.w
+                            // window.location = '/WebHelper/Download?file=' + data;
+                        }
+                    });
+                }
+            });
+        });
+       
+    </script>}

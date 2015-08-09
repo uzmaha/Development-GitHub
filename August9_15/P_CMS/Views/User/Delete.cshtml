@@ -1,0 +1,92 @@
+﻿@model P_CMS.Models.RegisterViewModel
+@{
+    ViewBag.Title = Model.FirstName + " " + Model.LastName;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}<style>
+    .lblProducts {
+        color: green !important;
+        margin-bottom: 0px !important;
+        font-weight: normal !important;
+        line-height: 0px !important;
+    }
+</style>
+<h2>Delete</h2>
+<h3>Are you sure you want to delete @ViewBag.Title account?</h3>
+<div>
+    <h4>@ViewBag.Title</h4>@Html.HiddenFor(model => model.selectedProduct, htmlAttributes: new { @id = "selectedProduct" })
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.FirstName)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.FirstName)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.LastName)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.LastName)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Email)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Email)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.ContactNo)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.ContactNo)
+        </dd>
+        @if (Model.Products != null && Model.Products.Count() > 0 && (!string.IsNullOrEmpty(Model.selectedProduct)))
+        {
+            <dt>
+                Assigned Products
+            </dt>
+            <dd>
+                <div id="dvManagerProducts">
+                    <div class=" dvManagerProducts">
+                        @foreach (var item in Model.Products)
+                        {
+                            <label class="lblProducts hidden" id="@item.ProductId">@item.ProductName</label><br />
+                        }
+                    </div>
+                </div>
+
+            </dd>}
+    </dl>
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+        <div class="form-actions no-color">
+            <input type="submit" value="Delete" class="btn btn-default" /> |
+            @Html.ActionLink("Back", "Index")
+        </div>
+    }
+</div>
+@section Scripts {
+    <script>
+        var productArray = [];
+        $(document).ready(function () { setAssignedProducts(); });
+        function setAssignedProducts() {
+            var selectedProducts = $('#selectedProduct').val();
+            if (selectedProducts != '') {
+                productArray = selectedProducts.split(",");
+             
+                if (productArray.length > 0) {
+                    checkSelecetedProducts(productArray);
+                }
+            }
+        }
+
+        function checkSelecetedProducts(selectedProductArray) {
+            $(".lblProducts").each(function () {
+                var currentProductId = $(this).attr('id');
+                if ($.inArray(currentProductId, selectedProductArray) > -1) {
+                    $(this).removeClass('hidden');
+                }
+            });
+        }
+    </script>}

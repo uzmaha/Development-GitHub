@@ -1,0 +1,234 @@
+﻿@model IEnumerable<P_CMS.Models.TaskModels>
+<style>
+    .txtDescription {
+        background-color: #fff;
+        display: block;
+        font-size: 13px;
+        font-weight: normal;
+        height: 50px;
+        margin-bottom: 0;
+        overflow-x: hidden;
+        overflow-y: scroll;
+        width: auto;
+    }
+
+    th {
+        background-color: #333333;
+        color: white;
+        border-color: white !important;
+    }
+
+    td, th {
+        text-align: center !important;
+        vertical-align: middle !important;
+    }
+
+    .reassignedText {
+        color: green !important;
+    }
+        .reassignedText > hr {
+            border-color: green !important;
+        }
+
+    .closedText > hr {
+        border-color: red !important;
+    }
+
+    .closedText {
+        color: red !important;
+    }
+
+    .BoldText {
+        font-size: 15px !important;
+    }
+        .BoldText > div {
+            background-color: yellow;
+        }
+
+    .newLine {
+        border-color: #b7b7b7;
+        margin-bottom: 5px;
+        margin-top: 0px;
+    }
+
+    hr {
+        margin-top: 0px;
+    }
+
+    .body-content {
+        padding-left: 0px;
+        padding-right: 0px;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+    .container {
+        max-width: 1278px;
+    }
+
+    .dvDescription {
+        text-align: left !important;
+    }
+
+    .table thead > tr > th, .table tbody > tr > th, .table tfoot > tr > th, .table thead > tr > td, .table tbody > tr > td, .table tfoot > tr > td, .table thead > tr > th, .table tbody > tr > th, .table tfoot > tr > th, .table thead > tr > td, .table tbody > tr > td, .table tfoot > tr > td {
+        border: 1px solid #dddddd;
+        line-height: 1.42857;
+        padding: 2px;
+        vertical-align: top;
+    }
+
+    .floatright {
+        float: right;
+    }
+
+    .fontsize1 {
+        font-size: 30px;
+    }
+</style>
+@{
+    string statusType = ViewData["StatusType"].ToString() == "" ? "" : "'" + ViewData["StatusType"].ToString() + "'";
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<h2>View Tasks</h2>
+@if ((User.IsInRole(P_CMS.UtilityClasses.AppRoles.ADMINISTRATOR)) || (User.IsInRole(P_CMS.UtilityClasses.AppRoles.SUPERUSER)))
+{    <p>
+        @Html.ActionLink("Create New", "Create")
+    </p>
+}<div class="row col-md-12">
+    <div class="col-md-6">
+        @Html.DropDownList("StatusId", null, "Select Status", htmlAttributes: new { @class = "form-control", id = "ddlStatus" })
+    </div>
+    @if (Model != null && Model.Count() > 0)
+    {<div class="col-md-6"><label class="floatright fontsize1">View all @statusType tasks.</label></div>}
+</div>
+
+@if (Model != null && Model.Count() > 0)
+{
+    <table class="table">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.TaskCode)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Client.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AssignedTo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Priority)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Product)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Status)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Tag)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CreatedOn)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.UpdatedOn)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CreatedBy)
+            </th>
+            <th class="col-md-1">Action</th>
+        </tr>
+        @foreach (var item in Model)
+        {
+            <tr class="trDescription">
+                <td>
+                    @Html.DisplayFor(modelItem => item.TaskCode)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Client.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.AssignedTo)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Priority.PriorityType)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Product.ProductName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.StatusType)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Tag.TagValue)
+                </td>
+                <td>
+                    <label class="txtDescription"> @Html.Raw(WebUtility.HtmlDecode(item.Description))</label>
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CreatedOn)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.UpdatedOn)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CreatedBy)
+                </td>
+                <td class="col-md-1">
+                    @if (((item.StatusType.ToLower() == P_CMS.UtilityClasses.AppStatus.CLOSED) && ((User.IsInRole(P_CMS.UtilityClasses.AppRoles.MANAGER)) || (User.IsInRole(P_CMS.UtilityClasses.AppRoles.SUPERUSER)))) || ((User.IsInRole(P_CMS.UtilityClasses.AppRoles.MANAGER)) || (User.IsInRole(P_CMS.UtilityClasses.AppRoles.SUPERUSER))) || (((item.StatusType.ToLower() != P_CMS.UtilityClasses.AppStatus.CLOSED) && (item.StatusType.ToLower() != P_CMS.UtilityClasses.AppStatus.UNASSIGNED)) && (User.IsInRole(P_CMS.UtilityClasses.AppRoles.TUSER))))
+                    {
+                        string link_text = ((item.StatusType.ToLower() == P_CMS.UtilityClasses.AppStatus.ASSIGNED) || (item.StatusType.ToLower().Contains("reassigned"))) ? "Reassign Task" : "Assign Task";
+                        @Html.ActionLink(link_text, "AssignedTask", new { id = item.IssueId }, new AjaxOptions { HttpMethod = "POST" })
+                        <br />
+                    }
+                    @if ((item.StatusType.ToLower() != P_CMS.UtilityClasses.AppStatus.CLOSED) && (User.IsInRole(P_CMS.UtilityClasses.AppRoles.TUSER)))
+                    {
+                        @Html.ActionLink("Change Status", "TaskStatus", new { id = item.IssueId }, new AjaxOptions { HttpMethod = "POST" })
+                        <br />
+                    }
+                    @Html.ActionLink("Details", "Details", new { id = item.IssueId })
+                </td>
+            </tr>
+        }
+    </table>
+}
+else
+{<label>No tasks found.</label> }
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('.trDescription').each(function () {
+                $(this).find('.txtDescription').find('.dvDescription').first().addClass('BoldText');
+                var num = 0;
+                $($(this).find(".txtDescription").find('.dvDescription').get().reverse()).each(function (i) {
+                    num++;
+                    $(this).find('hr').next().prepend(num + "- ");
+                });
+            });
+
+            $('#ddlStatus').change(function (e) {
+                e.preventDefault();
+                var selected_status = $(this).val();
+                var selected_text = $("#ddlStatus :selected").text();
+                var statusId = JSON.stringify({ id: -1, statusId: selected_status });
+                if (selected_status != "") {
+                    $.ajax({
+                        url: '/Issue/Index',
+                        type: 'POST',
+                        data: statusId,
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (response) {
+                            $('body').html('');
+                            $('body').html(response);
+                        }
+                    });
+                }
+            });
+        });
+    </script>}

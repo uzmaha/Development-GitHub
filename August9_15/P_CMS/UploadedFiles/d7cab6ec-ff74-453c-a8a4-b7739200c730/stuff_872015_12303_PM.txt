@@ -1,0 +1,43 @@
+
+Previous messageNext messageBack to messages
+(No Subject)‏
+(No Subject)
+uzma zubair
+5/25/2015
+[Flag this message]
+To: uzma zubair
+  if (!context.Users.Any(u => u.UserName == "admin"))
+            {
+                var store = new UserStore<ApplicationUser>(context);
+                var userManager = new UserManager<ApplicationUser>(store);
+                var user = new ApplicationUser { UserName = "admin" };
+                userManager.Create(user, "password");
+
+                if (!context.Roles.Any(r => r.Name == "admin"))
+                {
+                    var roleStore = new RoleStore<IdentityRole>(context);
+                    var roleManager = new RoleManager<IdentityRole>(roleStore);
+                    roleManager.Create(new IdentityRole { Name = "admin"  });
+
+                }
+                userManager.AddToRole(user.Id, "admin");
+
+            }
+        }///////////
+6e64c711-7957-4a13-93e9-94de6515b565
+6e64c711-7957-4a13-93e9-94de6515b565
+PM> Add-Migration"add product tbl"
+
+ 
+
+PM> Enable-Migrations -EnableAutomaticMigrations
+Checking if the context targets an existing database...
+Code First Migrations enabled for project PronetTest.
+PM> Add-Migration "addproducttbl"
+Scaffolding migration 'addproducttbl'.
+The Designer Code for this migration file includes a snapshot of your current Code First model. This snapshot is used to calculate the changes to your model when you scaffold the next migration. If you make additional changes to your model that you want to include in this migration, then you can re-scaffold it by running 'Add-Migration addproducttbl' again.
+PM> Update-Database
+Specify the '-Verbose' flag to view the SQL statements being applied to the target database.
+.
+
+     

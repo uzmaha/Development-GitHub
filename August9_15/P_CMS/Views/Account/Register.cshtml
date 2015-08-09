@@ -1,0 +1,184 @@
+﻿@model P_CMS.Models.RegisterViewModel
+@{
+    ViewBag.Title = "Create User Account";
+}
+<style>
+    .chkProduct {
+    margin-right:6px !important;
+    }
+    #addRole {
+        margin-left: 4px;
+    }
+    .dvManagerProducts {padding-top:6px !important;
+    }
+</style>
+<h2>@ViewBag.Title</h2>
+@using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{@Html.HiddenFor(model => model.selectedProduct, htmlAttributes: new { @id = "selectedProduct" })
+    @Html.AntiForgeryToken()
+    <hr />
+    @Html.ValidationSummary("", new { @class = "text-danger" })
+    <div class="form-group">
+        @Html.LabelFor(model => model.FirstName, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.FirstName, new { htmlAttributes = new { @class = "form-control" } })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.LastName, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.LastName, new { htmlAttributes = new { @class = "form-control" } })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Email, new { @class = "col-md-2 control-label" })
+        <div class="col-md-10">
+            @Html.TextBoxFor(m => m.Email, new { @class = "form-control", @placeholder = "abc@pronet-tech.net" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.RoleId, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.DropDownListFor(model => model.RoleId, (IEnumerable<SelectListItem>)ViewBag.RoleId, "Select Role", htmlAttributes: new { @class = "form-control col-md-6" })
+            <button type="button" id="addRole" class="btn col-md-1 active btn-default" data-toggle="modal" data-target="#myModal">New Role</button>
+        </div>
+    </div>
+    @*if (Model.Products != null && Model.Products.Count() > 0)
+    {
+        <div id="dvManagerProducts" class="form-group">
+            <label class="control-label col-md-2">Assign Products</label>
+            <div class="col-md-10 dvManagerProducts">
+                @foreach (var item in Model.Products)
+                {
+                    <label><input type="checkbox" name="Products" class="chkProduct" id="@item.ProductId" />@item.ProductName</label><br />
+                }
+            </div>
+        </div>
+    }*@
+   if (Model.Products != null && Model.Products.Count() > 0)
+    {
+        <div id="dvManagerProducts" class="form-group">
+            <label class="control-label col-md-2">Assign Products</label>
+            <div class="col-md-10 dvManagerProducts">
+                @foreach (var item in Model.Products)
+                {
+                    <label><input type="checkbox"  class="chkProduct" id="@item.ProductId" />@item.ProductName</label><br />
+                }
+            </div>
+        </div>
+    }
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.ContactNo, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.ContactNo, new { htmlAttributes = new { @class = "form-control", autocomplete = "off" } })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Password, new { @class = "col-md-2 control-label" })
+        <div class="col-md-10">
+            @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.ConfirmPassword, new { @class = "col-md-2 control-label" })
+        <div class="col-md-10">
+            @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" id="btnRegister" class="btn btn-default" value="Register" />
+        </div>
+    </div>
+}
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Create Role</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <label>Enter Role</label>
+                    </div>
+                    <div class="col-md-5">
+                        <input type="text" name="Role" id="role" value=" " />
+                        <label id="lblMessage"></label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="addNewRole">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        var productArray = [];
+        $(document).ready(function () {          
+            $("#dvManagerProducts").slideUp();
+
+            $('#btnRegister').click(function () {
+                 productArray = $("input[type='checkbox'][class='chkProduct']:checked").map(function () {
+                    return this.id;
+                 }).get();
+                 
+                 $('#selectedProduct').val(productArray);                
+            });
+
+            $('#RoleId').change(function (e) {
+                var selectedRoleId = $(this).val();
+                var selectedRoleName = $.trim($("#RoleId :selected").text());               
+                if (selectedRoleName.toLowerCase() == "manager") {
+                    if ($('#dvManagerProducts').is(":hidden")) {
+                        $("#dvManagerProducts").slideDown();
+                    }                  
+                } else {
+                    UncheckAllProducts();
+                    if (!$('#dvManagerProducts').is(":hidden")) {                       
+                        $("#dvManagerProducts").slideUp();
+                    }                    
+                }
+            });
+
+            $('#lblMessage').val('');
+
+            $('#addNewRole').click(function () {
+                var new_role = $('#role').val();
+                var role = JSON.stringify({ role: new_role });
+                $.ajax({
+                    url: '/User/AddRole',
+                    type: 'POST',
+                    data: role,
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (response) {
+                        if (response) {
+                            $('#lblMessage').val('');
+                            $('#role').val('');
+                            $('#myModal').modal('toggle');
+                            document.location.reload();
+                        }
+                    }
+                   , error: function () {
+                       $('#lblMessage').val('Role not added');
+                   }
+                });
+            });
+        });
+       
+        function UncheckAllProducts() {
+            $("input[class='chkProduct']:checked").each(function () {
+                var parentTAG = $(this).closest('label');
+                var tdHTML = $(this).parent().clone();
+                tdHTML = tdHTML.html().replace('checked="checked"', '');
+                parentTAG.html(tdHTML);
+                $(this).html().replace('checked="checked"', '');               
+            });          
+        }
+    </script>
+}

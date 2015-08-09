@@ -1,0 +1,259 @@
+﻿@Styles.Render("~/Content/themes/base/css")
+<style>
+    .ifReport {
+        border: none;
+        height: 700px;
+    }
+
+    .dbHeader {
+        box-shadow: 0 15px 10px -10px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.1), 0 0 40px rgba(0, 0, 0, 0.1) inset;
+        background-color: #bababa;
+        border-radius: 4px;
+    }
+
+    .lbldate {
+        margin-top: 2px;
+        text-align: right;
+        padding-left: 4px;
+        padding-right: 9px;
+    }
+
+    .dbHeader > div {
+        padding-top: 10px;
+    }
+
+    .dvdate {
+        color: #fff;
+        margin-top: 4px;
+        padding-left: 14px !important;
+        padding-right: 14px !important;
+    }
+
+    .datepicker {
+        padding-left: 2px !important;
+        padding-right: 2px !important;
+        /*width: 80px;*/
+    }
+
+    .btn {
+        padding-left: 4px !important;
+        padding-right: 4px !important;
+    }
+
+    .lblHeader {
+        padding-top: 2px !important;
+    }
+</style>
+@{
+    ViewBag.Title = "AllIssueReport";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<h2>Issue Report</h2>
+<div class="row dbHeader">
+    <div class="col-md-11">
+        <div class="col-md-2">
+            <p>
+                @Html.DropDownList("ClientId", (IEnumerable<SelectListItem>)ViewBag.ClientId, "Select Client", htmlAttributes: new { @class = "form-control", id = "ClientId" })
+            </p>
+        </div>
+        <div class="col-md-2">
+            <p>@Html.DropDownList("PriorityId", null, "Select Priority", htmlAttributes: new { @class = "form-control", id = "PriorityId" })</p>
+        </div>
+        <div class="col-md-2">
+            <p>
+                @Html.DropDownList("StatusId", (IEnumerable<SelectListItem>)ViewBag.Statusid, "Select Status", htmlAttributes: new { @class = "form-control", id = "StatusId" })
+            </p>
+        </div>
+        <div class="col-md-2">
+            <p>@Html.DropDownList("ProductId", (IEnumerable<SelectListItem>)ViewBag.ProductId, "Select Product", htmlAttributes: new { @class = "form-control", id = "ProductId" })</p>
+        </div>
+        <div class="col-md-2 dvdate">
+            <p>
+                <label class="col-md-6 lbldate"> Date From  </label>
+                <input type="text" name="dateFrom" readonly="readonly" id="dateFrom" class="datepicker col-md-6" value=" " />
+            </p>
+        </div>
+        <div class="col-md-2 dvdate">
+            <p>
+                <label class="col-md-6 lbldate">Date To  </label>   <input type="text" readonly="readonly" name="dateTo" id="dateTo" class="datepicker col-md-6" value=" " />
+            </p>
+        </div>
+    </div>
+    <div class="col-md-1">
+        <input id="btnFilterSearch" value="Search" class="btn btn-default col-md-10 btnFilterSearch" />
+    </div>
+</div>
+
+<div class="row">
+    <iframe id="ReportFrame" src="~/Report/reporttest.aspx" class="col-md-12 ifReport"></iframe>
+    <label id="lblNotFound">No tasks found.</label>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        var clientid = 0;
+        var priorityid = 0;
+        var statusid = 0;
+        var productid = 0;
+        var issuesDetail = '';
+        var issueByDate = '';
+        var date = null;
+        var client='';
+        var priority= '';
+        var status = '';
+        var product = '';
+
+        $(document).ready(function () {
+            var DashboardViewModel = '';
+            issueByDate = DashboardViewModel;
+            $(".datepicker").datepicker().datepicker("option", "dateFormat", "dd/mm/yy");
+
+            $('#ddlStatus').change(function (e) {
+                e.preventDefault();
+                var selected_status = $(this).val();
+                var selected_text = $("#ddlStatus :selected").text();
+                var statusId = JSON.stringify({ id: -2, statusId: selected_status });
+                if (selected_status != "") {
+                    $.ajax({
+                        url: '/Issue/Index',
+                        type: 'POST',
+                        data: statusId,
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (response) {
+                            $('body').html('');
+                            $('body').html(response);
+                        }
+                    });
+                }
+            });
+
+            $('#btnFilterSearch').click(function () {
+                $("#ReportFrame").attr("src", "");
+                clientid = $.trim($("#ClientId option:selected").val()) != '' ? $.trim($("#ClientId option:selected").val()) : 0;
+                priorityid = $.trim($("#PriorityId option:selected").val()) != '' ? $.trim($("#PriorityId option:selected").val()) : 0;
+                statusid = $.trim($("#StatusId option:selected").val()) != '' ? $.trim($("#StatusId option:selected").val()) : 0;
+                productid = $.trim($("#ProductId option:selected").val()) != '' ? $.trim($("#ProductId option:selected").val()) : 0;
+                client = $.trim($("#ClientId option:selected").val()) != '' ? $.trim($("#ClientId option:selected").text()) : '';
+                priority = $.trim($("#PriorityId option:selected").val()) != '' ? $.trim($("#PriorityId option:selected").text()) :'';
+                status = $.trim($("#StatusId option:selected").val()) != '' ? $.trim($("#StatusId option:selected").text()) : '';
+                product = $.trim($("#ProductId option:selected").val()) != '' ? $.trim($("#ProductId option:selected").text()) : '';
+                var dateto = $.trim($("#dateTo").val());
+                var datefrom = $.trim($("#dateFrom").val());
+                if (isValidDate("dateFrom", "dateTo")) {
+                    var params = JSON.stringify({ ClientId: clientid, PriorityId: priorityid, ProductId: productid, StatusId: statusid, DateTo: dateto, DateFrom: datefrom });
+                    jQuery.ajax({
+                        type: "POST",
+                        url: "/Report/GeneralReport",
+                        data: params,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            if (data !== '' && data.length > 0) {
+                                $("#ReportFrame").show();
+                                $("#ReportFrame").attr("src", "/Report/reporttest.aspx?client=" + client + "&status=" + status + "&priority=" + priority + "&product=" + product + "&fromDate=" + datefrom + "&toDate=" + dateto);
+                                $('#lblNotFound').hide();
+                            } else {
+                                emptyDashborad();
+                            }
+                        },
+                        error: function () {
+                        },
+                        failure: function () {
+                        },
+                        complete: function () {
+                        }
+                    });
+                } else { emptyDashborad(); }
+            });
+            var getStatusArray = [];
+            getStatusArray = DashboardViewModel.IssuesSearchCounter;
+        });
+
+        function emptyDashborad() {
+            $("#dateTo").val('');
+            $("#dateFrom").val('');
+            issueByDate = '';
+            $('#lblNotFound').show();
+            $("#ReportFrame").hide();
+        }
+
+        function isValidDate(varFrom, varTo) {
+            var fromdate, todate, dt1, dt2, mon1, mon2, yr1, yr2, date1, date2;
+            var chkFrom = document.getElementById(varFrom);
+            var chkTo = document.getElementById(varTo);
+            if ($.trim(document.getElementById(varFrom).value, '') == '') {
+                document.getElementById(varFrom).value = '';
+            }
+            else if ($.trim(document.getElementById(varFrom).value, '') != '') {
+                if (checkdate(chkFrom) != true)
+                { return false; }
+            }
+            if ($.trim(document.getElementById(varTo).value, '') == '') {
+                document.getElementById(varTo).value = '';
+            } else if ($.trim(document.getElementById(varTo).value, '') != '') {
+                if (checkdate(chkTo) != true)
+                { return false; }
+            }
+            if (varFrom != null && $.trim(document.getElementById(varFrom).value, '') != '' && varTo != null && $.trim(document.getElementById(varTo).value, '') != '') {
+                if (checkdate(chkFrom) != true) {
+                    document.getElementById(varFrom).value = '';
+                    document.getElementById(varFrom).focus();
+                    return false;
+                }
+                else if (checkdate(chkTo) != true) {
+                    document.getElementById(varTo).value = '';
+                    document.getElementById(varTo).focus();
+                    return false;
+                }
+                else {
+                    fromdate = $.trim(document.getElementById(varFrom).value, '');
+                    todate = $.trim(document.getElementById(varTo).value, '');
+                    dt1 = parseInt(fromdate.substring(0, 2), 10);
+                     mon1 = parseInt(fromdate.substring(3, 5), 10);
+                    yr1 = parseInt(fromdate.substring(6, 10), 10);
+                    dt2 = parseInt(todate.substring(0, 2), 10);
+                    mon2= parseInt(todate.substring(3, 5), 10);
+                    yr2 = parseInt(todate.substring(6, 10), 10);
+                    date1 = new Date(yr1, mon1, dt1);
+                    date2 = new Date(yr2, mon2, dt2);
+                    if (date2 < date1) {
+                        alert("To date Should be greater than From date");
+                        document.getElementById(varTo).value = '';
+                        document.getElementById(varTo).focus();
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        function checkdate(input) {
+            if (input != '') {
+                var validformat = /^\d{2}\/\d{2}\/\d{4}$/;
+                var returnval = false;
+                if (!validformat.test(input.value)) {
+                    alert("Invalid Date Format. Please correct and submit again.");
+                    return false;
+                }
+                else {
+                    var monthfield = input.value.split("/")[1];
+                    var dayfield= input.value.split("/")[0];
+                    var yearfield = input.value.split("/")[2];
+                    var dayobj = new Date(yearfield, monthfield - 1, dayfield);
+                    var currentDay = new Date().getDate();
+                    var currentMonth = new Date().getMonth() + 1;
+                    var currentYear = new Date().getFullYear();
+                    var currentDate = new Date(currentYear, currentMonth, currentDay);
+                    var selecetedDate = new Date(yearfield, monthfield, dayfield);
+                    if (currentDate < selecetedDate) {
+                        alert("Invalid Selection. Please correct and submit again.");
+                        return false;
+                    }
+                    if ((dayobj.getMonth() + 1 != monthfield) || (dayobj.getDate() != dayfield) || (dayobj.getFullYear() != yearfield))
+                        alert("Invalid Day, Month, or Year range detected. Please correct and submit again.");
+                    else
+                        returnval = true;
+                }
+            } else { returnval = true; }
+            return returnval;
+        }
+    </script>}

@@ -1,0 +1,616 @@
+﻿@*@model P_CMS.ViewModels.DashboardViewModel*@
+@model System.Web.Mvc.JsonResult
+@{
+    ViewBag.Title = "Home Page";
+}
+@Styles.Render("~/Content/themes/base/css")
+<style>
+    .txtDescription {
+        background-color: #fff;
+        display: block;
+        font-size: 13px;
+        font-weight: normal;
+        height: 50px;
+        margin-bottom: 0;
+        overflow-x: hidden;
+        overflow-y: scroll;
+        width: auto;
+    }
+
+    th {
+        background-color: #333333;
+        color: white;
+        border-color: white !important;
+    }
+
+    td, th {
+        text-align: center !important;
+        vertical-align: middle !important;
+    }
+
+    .reassignedText {
+        color: green !important;
+    }
+
+        .reassignedText > hr {
+            border-color: green !important;
+        }
+
+    .closedText > hr {
+        border-color: red !important;
+    }
+
+    .closedText {
+        color: red !important;
+    }
+
+    .BoldText {
+        font-size: 15px !important;
+    }
+
+        .BoldText > div {
+            background-color: yellow;
+        }
+
+    .newLine {
+        border-color: #b7b7b7;
+        margin-bottom: 5px;
+        margin-top: 0px;
+    }
+
+    hr {
+        margin-top: 0px;
+    }
+
+    .body-content {
+        padding-left: 0px;
+        padding-right: 0px;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+    .container {
+        max-width: 1278px;
+    }
+
+    .dvDescription {
+        text-align: left !important;
+    }
+
+    .table thead > tr > th, .table tbody > tr > th, .table tfoot > tr > th, .table thead > tr > td, .table tbody > tr > td, .table tfoot > tr > td, .table thead > tr > th, .table tbody > tr > th, .table tfoot > tr > th, .table thead > tr > td, .table tbody > tr > td, .table tfoot > tr > td {
+        border: 1px solid #dddddd;
+        line-height: 1.42857;
+        padding: 2px;
+        vertical-align: top;
+    }
+
+    .floatright {
+        float: right;
+    }
+
+    .col-md-2 {
+        padding-left: 2px;
+        padding-right: 2px;
+    }
+
+    .chartNavigator {
+        color: #fff !important;
+    }
+
+    .lbldate {
+        text-align: right;
+        padding-left: 4px;
+        padding-right: 9px;
+    }
+
+    .fontsize1 {
+        font-size: 30px;
+    }
+
+    .dvdate {
+        color: #fff;
+        margin-top: 4px;
+    }
+
+    .aText {
+        color: black !important;
+    }
+
+    .dbHeader {
+        box-shadow: 0 15px 10px -10px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.1), 0 0 40px rgba(0, 0, 0, 0.1) inset;
+        background-color: #222222;
+        border-radius: 4px;
+    }
+
+        .dbHeader > div {
+            padding-top: 10px;
+        }
+
+    #chart {
+        display: block;
+        left: -0.5px;
+        position: relative;
+        top: 0;
+    }
+    #dateFrom,#dateTo{padding-left:2px;
+               padding-right:2px;
+    }
+
+    .thEmpty {
+        border-top: none !important;
+    }
+
+    .theEmpty {
+        border-bottom: none !important;
+    }
+
+    .dvRadio {
+        margin-bottom: 10px;
+        float: right;
+        margin-top: 34px;
+    }
+
+        .dvRadio > input, .dvRadio > label {
+            float: right;
+        }
+
+    .lblChart {
+        margin-right: 14px !important;
+        margin-left: 4px !important;
+    }
+
+    .rdchart {
+        margin-top: 2px !important;
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-7">
+        <h2>DASHBOARD</h2>
+    </div>
+    <div class="col-md-5 dvRadio">
+        <label class="lblChart">Column Chart</label><input type="radio" value="column" class="rdchart" name="rdchart" id="rdBar" />
+        <label class="lblChart">Bar Chart</label><input type="radio" value="bar" class="rdchart" name="rdchart" id="rdBar" />
+        @*<label class="lblChart">Line Chart</label><input type="radio" value="line" class="rdchart" name="rdchart" id="rdLine" />*@
+        <label class="lblChart">Pie Chart</label><input type="radio" name="rdchart" class="rdchart" id="rdPie" value="pie" />
+    </div>
+</div>
+<div class="row dbHeader">
+    <div class="col-md-11">
+        <div class="col-md-2">
+            <p>
+                @Html.DropDownList("ClientId", (IEnumerable<SelectListItem>)ViewBag.ClientId, "Select Client", htmlAttributes: new { @class = "form-control", id = "ClientId" })
+            </p>
+        </div>
+        <div class="col-md-2">
+            <p>@Html.DropDownList("PriorityId", null, "Select Priority", htmlAttributes: new { @class = "form-control", id = "PriorityId" })</p>
+        </div>
+        <div class="col-md-2">
+            <p>
+                @Html.DropDownList("StatusId", (IEnumerable<SelectListItem>)ViewBag.Statusid, "Select Status", htmlAttributes: new { @class = "form-control", id = "StatusId" })
+            </p>
+        </div>
+        <div class="col-md-2">
+            <p>@Html.DropDownList("ProductId", (IEnumerable<SelectListItem>)ViewBag.ProductId, "Select Product", htmlAttributes: new { @class = "form-control", id = "ProductId" })</p>
+        </div>
+        <div class="col-md-2 dvdate">
+            <p>
+                <label class="col-md-6 lbldate"> Date From  </label>
+                <input type="text" name="dateFrom" readonly="readonly" id="dateFrom" class="datepicker col-md-6" value=" " />
+            </p>
+        </div>
+        <div class="col-md-2 dvdate">
+            <p>
+                <label class="col-md-6 lbldate">Date To  </label>   <input type="text" readonly="readonly" name="dateTo" id="dateTo" class="datepicker col-md-6" value=" " />
+            </p>
+        </div>
+    </div>
+    <div class="col-md-1">
+        <input id="btnFilterSearch" value="Search" class="btn btn-default col-md-10 btnFilterSearch" />
+    </div>
+</div>
+<div class="row">
+
+    <div class="col-md-4" id="dvClientChart">
+        <div id="dvClientchart">
+        </div>
+    </div>
+    <div class="col-md-8" id="dvStatusChart">
+        <div id="chart"></div>
+    </div>
+</div>
+<table class="table" id="dvHeader">
+    <tr>
+        <th class="theEmpty">
+            <label>Clients</label>
+        </th>
+        <th colspan="3">
+            Priority
+        </th>
+        <th colspan="6">
+            Status
+        </th>
+    </tr>
+    <tr>
+        <th class="thEmpty">
+        </th>
+        <th>
+            <label>High</label>
+        </th>
+        <th>
+            <label>Medium</label>
+        </th>
+        <th>
+            <label>Low</label>
+        </th>
+        <th>
+            <label>Unassigned Issues</label>
+        </th>
+        <th>
+            <label>Assigned Issues</label>
+        </th>
+        <th>
+            <label>Issues Reassigned by Technical Users</label>
+        </th>
+        <th>
+            <label>Issues Reassigned by Manager</label>
+        </th>
+        <th>
+            <label>Issues Reassigned by SuperUser</label>
+        </th>
+        <th>           
+            <label>Closed Issues</label>
+        </th>
+    </tr>
+</table>
+<script id="IssuesCountTemplate" type="text/x-jQuery-tmpl">
+    <tr class="trRows">
+        <td>
+            <label>
+                <a href="/Issue/Index/-2/0/${ClientId}/0/${ProductId}/${Date}">${ClientName}</a>
+            </label>
+        </td>
+        <td>
+            <label><a class="aText" href="/Issue/Index/-2/0/${ClientId}/${HighId}/${ProductId}/${Date}">${HighCount}</a></label>
+        </td>
+        <td>
+            <label><a class="aText" href="/Issue/Index/-2/0/${ClientId}/${MediumId}/${ProductId}/${Date}">${MediumCount}</a></label>
+        </td>
+        <td>
+            <label><a class="aText" href="/Issue/Index/-2/0/${ClientId}/${LowId}/${ProductId}/${Date}">${LowCount}</a></label>
+        </td>
+        <td>
+            <label> <a class="aText" href="/Issue/Index/-2/${UnAssignedId}/${ClientId}/0/${ProductId}/${Date}">${UnassignedCount}</a></label>
+        </td>
+        <td>
+            <label> <a class="aText" href="/Issue/Index/-2/${AssignedId}/${ClientId}/0/${ProductId}/${Date}">${AssignedCount}</a> </label>
+        </td>
+        <td>
+            <label> <a class="aText" href="/Issue/Index/-2/${ReassignedByTUserId}/${ClientId}/0/${ProductId}/${Date}">${ReassignedByTUserCount}</a></label>
+        </td>
+        <td>
+            <label>  <a class="aText" href="/Issue/Index/-2/${ReassignedByManagerId}/${ClientId}/0/${ProductId}/${Date}">${ReassignedByManagerCount}</a></label>
+        </td>
+        <td>
+            <label><a class="aText" href="/Issue/Index/-2/${ReassignedBySuperUserId}/${ClientId}/0/${ProductId}/${Date}">${ReassignedBySuperUserCount}</a> </label>
+        </td>
+        <td>
+            <label><a class="aText" href="/Issue/Index/-2/${ClosedId}/${ClientId}/0/${ProductId}/${Date}">${ClosedCount}</a> </label>
+        </td>
+    </tr>
+</script>
+@section Scripts {
+
+
+    <script type="text/javascript" src="~/Scripts/jquery.tmpl.js"></script>
+    <link href="~/content/kendo/kendo.common.min.css" rel="stylesheet" />
+
+    <link href="~/content/kendo/def.css" rel="stylesheet" />
+    <link href="~/content/kendo/kendo.dataviz.min.css" rel="stylesheet" />
+    <script type="text/javascript" src="~/Scripts/kendo.all.min.js"></script>
+
+    <script type="text/javascript">
+        var chartType = 'pie';
+        var clientid = 0;
+        var priorityid = 0;
+        var statusid = 0;
+        var productid = 0;
+        var clientIssueDetail = '';
+        var issuesDetail = '';
+        var issueByDate = '';
+        var date = null;
+        $('#rdPie').attr("checked", "checked");
+       
+        $(document).ready(function () {
+            $(document.body).on('change', '.rdchart', function () {
+                chartType = $(this).val();
+                if (issueByDate.IssuesSearchCounts.length > 0) {
+                    LoadPieChart(chartType, issuesDetail, clientIssueDetail);
+                }
+            });
+
+            var DashboardViewModel = $.parseJSON('@Html.Raw(Json.Encode(Model.Data))');
+            issueByDate = DashboardViewModel;
+            if (DashboardViewModel.IssuesSearchCounts.length > 0) {
+                $("#IssuesCountTemplate").tmpl(DashboardViewModel.IssuesSearchCounts).appendTo("#dvHeader");
+                LoadPieChart(chartType, DashboardViewModel.IssuesSearchCounter, DashboardViewModel.IssuesSearchClientCounter);
+            } else {
+                issueByDate = '';
+                $('tr.trRows').remove();
+                $("#dvHeader").hide();
+                $("#dvClientchart").empty();
+              //  $("#Clientchart").hide();
+                $("#chart").empty();
+                $("#dvClientchart").html("<label>No Issues Found</label>");
+            }
+            // $(".datepicker").datepicker();
+            // $(".datepicker").datepicker().datepicker('setDate', 'today');
+            $(".datepicker").datepicker().datepicker("option", "dateFormat", "dd/mm/yy");
+
+            $('#ddlStatus').change(function (e) {
+                e.preventDefault();
+                var selected_status = $(this).val();
+                var selected_text = $("#ddlStatus :selected").text();
+                var statusId = JSON.stringify({ id: -2, statusId: selected_status });
+                if (selected_status != "") {
+                    $.ajax({
+                        url: '/Issue/Index',
+                        type: 'POST',
+                        data: statusId,
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (response) {
+                            $('body').html('');
+                            $('body').html(response);
+                        }
+                    });
+                }
+            });
+
+            $('#btnFilterSearch').click(function () {
+                clientid = $.trim($("#ClientId option:selected").val()) != '' ? $.trim($("#ClientId option:selected").val()) : 0;
+                priorityid = $.trim($("#PriorityId option:selected").val()) != '' ? $.trim($("#PriorityId option:selected").val()) : 0;
+                statusid = $.trim($("#StatusId option:selected").val()) != '' ? $.trim($("#StatusId option:selected").val()) : 0;
+                productid = $.trim($("#ProductId option:selected").val()) != '' ? $.trim($("#ProductId option:selected").val()) : 0;
+                var dateto = $.trim($("#dateTo").val());
+                var datefrom = $.trim($("#dateFrom").val());
+                if (isValidDate("dateFrom", "dateTo")) {
+                    var params = JSON.stringify({ ClientId: clientid, PriorityId: priorityid, ProductId: productid, StatusId: statusid, DateTo: dateto, DateFrom: datefrom });
+                    jQuery.ajax({
+                        type: "POST",
+                        url: "/Home/DashBoardPieChart",
+                        data: params,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            $('tr.trRows').remove();
+                            $("#dvHeader").hide();
+                            if (data[0].IssuesSearchCounter[0].projectType != "False") {
+                                $("#dvHeader").show();
+                                $("#chart").empty();
+                                $("#dvClientchart").empty();
+                                $("#IssuesCountTemplate").tmpl(data[0].IssuesSearchCounts).appendTo("#dvHeader");
+                                LoadPieChart(chartType, data[0].IssuesSearchCounter, data[0].IssuesSearchClientCounter)
+                                issueByDate = data[0];
+                                date = DashboardViewModel.IssuesSearchCounts[0].Date;
+                            } else {
+
+                                emptyDashborad();
+                            }
+                        },
+                        error: function () {
+                        },
+                        failure: function () {
+                        },
+                        complete: function () {
+                        }
+                    });
+                } else { emptyDashborad(); }
+            });
+
+            var getStatusArray = [];
+            getStatusArray = DashboardViewModel.IssuesSearchCounter;
+            getClientArray = DashboardViewModel.IssuesSearchClientCounter;
+            $(document.body).on('click', '.k-tooltip', function (e) {
+                e.preventDefault();
+                var currnetAnchor = $(this).find('a');
+                var statusTypeOfLink = $.trim(currnetAnchor.attr('id'));
+                date = issueByDate.IssuesSearchCounts[0].Date;
+                $.each(getStatusArray, function (index, value) {
+                    var thisAnchor = $(this);
+                    var thislink = value;
+                    var statusType = $.trim(thislink.IssueTitle);
+                    if (statusType === statusTypeOfLink ) {
+                        var statusID = thislink.statusId;
+                        var link = '/Issue/Index/-2/status/client/priority/product/date';                        
+                        link = link.replace('status', statusID).replace('client', clientid).replace('priority', priorityid).replace('product', productid).replace('date', date);
+                        window.location.href = link;
+                    }                   
+                });
+               
+                $.each(getClientArray, function (index, value) {
+                    var thisAnchor = $(this);
+                    var thislink = value;                 
+                    if ($.trim(thislink.IssueTitle) === statusTypeOfLink) {
+                        clientid = $.trim(thislink.clientid);                     
+                        var link = '/Issue/Index/-3/status/client/priority/product/date';
+                        link = link.replace('status', statusid).replace('client', clientid).replace('priority', priorityid).replace('product', productid).replace('date', date);
+                        window.location.href = link;
+                    }
+                });
+                return false;
+            });
+        });
+
+        function emptyDashborad() {
+            $("#dateTo").val('');
+            $("#dateFrom").val('');
+            issueByDate = '';
+            $('tr.trRows').remove();
+            $("#dvHeader").hide();
+            $("#chart").empty();
+           // $("#Clientchart").hide();
+            $("#dvClientchart").empty();
+            $("#dvClientchart").html("<label>No Issues Found</label>");
+        }
+
+        function isValidDate(varFrom, varTo) {
+            var fromdate, todate, dt1, dt2, mon1, mon2, yr1, yr2, date1, date2;
+            var chkFrom = document.getElementById(varFrom);
+            var chkTo = document.getElementById(varTo);
+            if ($.trim(document.getElementById(varFrom).value, '') == '') {
+                document.getElementById(varFrom).value = '';
+            }
+            else if ($.trim(document.getElementById(varFrom).value, '') != '') {
+                if (checkdate(chkFrom) != true)
+                { return false; }
+            }
+            if ($.trim(document.getElementById(varTo).value, '') == '') {
+                document.getElementById(varTo).value = '';
+            } else if ($.trim(document.getElementById(varTo).value, '') != '') {
+                if (checkdate(chkTo) != true)
+                { return false; }
+            }
+            if (varFrom != null && $.trim(document.getElementById(varFrom).value, '') != '' && varTo != null && $.trim(document.getElementById(varTo).value, '') != '') {
+                if (checkdate(chkFrom) != true) {
+                    document.getElementById(varFrom).value = '';
+                    document.getElementById(varFrom).focus();
+                    return false;
+                }
+                else if (checkdate(chkTo) != true) {
+                    document.getElementById(varTo).value = '';
+                    document.getElementById(varTo).focus();
+                    return false;
+                }
+                else {
+                    fromdate = $.trim(document.getElementById(varFrom).value, '');
+                    todate = $.trim(document.getElementById(varTo).value, '');
+                    dt1 = parseInt(fromdate.substring(0, 2), 10);
+                    mon1 = parseInt(fromdate.substring(3, 5), 10);
+                    yr1 = parseInt(fromdate.substring(6, 10), 10);
+                    dt2 = parseInt(todate.substring(0, 2), 10);
+                    mon2 = parseInt(todate.substring(3, 5), 10);
+                    yr2 = parseInt(todate.substring(6, 10), 10);
+                    date1 = new Date(yr1, mon1, dt1);
+                    date2 = new Date(yr2, mon2, dt2);
+                    if (date2 < date1) {
+                        alert("To date Should be greater than From date.");
+                        document.getElementById(varTo).value = '';
+                        document.getElementById(varTo).focus();
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+       
+        function checkdate(input) {
+            if (input != '') {
+                var validformat = /^\d{2}\/\d{2}\/\d{4}$/;
+                var returnval = false;
+                if (!validformat.test(input.value)) {
+                    alert("Invalid Date Format. Please correct and submit again.");
+                    return false;
+                }
+                else {
+                    var monthfield = input.value.split("/")[1];
+                    var dayfield = input.value.split("/")[0];
+                    var yearfield = input.value.split("/")[2];
+                    var dayobj = new Date(yearfield, monthfield - 1, dayfield);
+                    var currentDay = new Date().getDate();
+                    var currentMonth = new Date().getMonth() + 1;
+                    var currentYear = new Date().getFullYear();
+                    var currentDate = new Date(currentYear, currentMonth, currentDay);
+                    var selecetedDate = new Date(yearfield, monthfield, dayfield);
+                    if (currentDate < selecetedDate) {
+                        alert("Invalid Selection. Please correct and submit again.");
+                        return false;
+                    }
+                    if ((dayobj.getMonth() + 1 != monthfield) || (dayobj.getDate() != dayfield) || (dayobj.getFullYear() != yearfield))
+                        alert("Invalid Day, Month, or Year range detected. Please correct and submit again.");
+                    else
+                        returnval = true;
+                }
+            } else { returnval = true; }
+            return returnval;
+        }
+
+        function LoadPieChart(chartType, issuesSearch, IssuesSearchClientCounter) {         
+            clientIssueDetail = IssuesSearchClientCounter;
+            issuesDetail = issuesSearch;
+            //  DashboardViewModel.IssuesSearchClientCounter
+            var projectType = $.trim($("#ClientId option:selected").val()) == '' ? "All Clients" : issuesDetail[0].projectType;
+          
+            if (clientIssueDetail.length) {
+                $("#dvClientChart").addClass('col-md-4');
+                $("#dvStatusChart").removeClass('col-md-12').addClass('col-md-8');
+                plotClientChart(clientIssueDetail, 'IssueCount', 'IssueTitle', 'color', 'statusId', clientIssueDetail.length > 0 ? projectType : "", chartType);
+            } else {
+                $("#dvClientChart").removeClass('col-md-4');
+                $("#dvStatusChart").removeClass('col-md-8').addClass('col-md-12');
+            }
+            PlotChart(issuesDetail, 'IssueCount', 'IssueTitle', 'color', 'statusId', 'Issues Status With ' + projectType, chartType);
+        }
+
+        function plotClientChart(obj, fieldValue, CategoryValue, color, statusID, HeadingText, chartType) {
+            $("#dvClientchart").kendoChart({
+                dataSource: obj,
+                title: {
+                    padding: 10,
+                    margin: 1,
+                    text: HeadingText
+                },
+                legend: {
+                    position: "right"
+                },
+                series: [{
+                    type: chartType,
+                    field: fieldValue,
+                    categoryField: CategoryValue,
+                    color: color,
+                    labels: {
+                        visible: true,
+                        format: "{0}",
+                    }
+                }],
+                categoryAxis: {
+                    field: CategoryValue
+                },
+                tooltip: {
+                    visible: true,
+                    template: "<a class='chartNavigator' id='#= category #'  >#= category # - #=value#</a>"
+                }
+            });
+        }
+
+        function PlotChart(obj, fieldValue, CategoryValue, color, statusID, HeadingText, chartType) {
+            $("#chart").kendoChart({
+                dataSource: obj,
+                title: {
+                    padding: 10,
+                    margin: 1,
+                    text: HeadingText
+                },
+                legend: {
+                    position: "right"
+                },
+                series: [{
+                    type: chartType,
+                    field: fieldValue,
+                    categoryField: CategoryValue,
+                    color: color,
+                    labels: {
+                        visible: true,
+                        format: "{0}",
+                    }
+                }],
+                categoryAxis: {
+                    field: CategoryValue
+                },
+                tooltip: {
+                    visible: true,
+                    template: "<a class='chartNavigator' id='#= category #'  >#= category # - #=value#</a>"
+                }
+            });
+        }
+    </script>}
